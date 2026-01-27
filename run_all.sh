@@ -24,6 +24,12 @@ PID2=$!
 echo "✅ 실행됨: Map Server (PID: $PID2)"
 sleep 1
 
+# [추가] (3) 위치(Odom) 서버 실행
+python3 pi_odom_server.py &
+PID_ODOM=$!
+echo "✅ 실행됨: Odom Server (PID: $PID_ODOM)"
+sleep 1
+
 # (3) 영상 송신 서버 실행
 python3 pi_ros_bridge.py &
 PID3=$!
