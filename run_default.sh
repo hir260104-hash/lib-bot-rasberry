@@ -24,7 +24,7 @@ sleep 3
 echo "📷 [3/3] 카메라(저화질 모드) 실행 중..."
 ros2 run v4l2_camera v4l2_camera_node --ros-args \
   -p image_size:="[320,240]" \
-  -p image_raw.compressed.jpeg_quality:=50 > /dev/null 2>&1 &
+  -p image_raw.compressed.jpeg_quality:=100 > /dev/null 2>&1 &
 PID_CAM=$!
 
 echo "---------------------------------------"
