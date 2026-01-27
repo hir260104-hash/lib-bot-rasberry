@@ -34,23 +34,36 @@ class MapServer(Node):
         """ ROS 지도 데이터(-1, 0, 100)를 -> OpenCV 이미지로 변환 """
         width = msg.info.width
         height = msg.info.height
-        data = np.array(msg.data).reshape((height, width))
 
-        # 데이터 변환 로직
-        # -1 (미탐험) -> 127 (회색)
-        # 0 (빈 공간) -> 255 (흰색)
-        # 100 (벽) -> 0 (검은색)
+        # [수정] 지도가 아직 생성되지 않았거나 크기가 0이면 무시 (에러 방지)
+        if width <= 0 or height <= 0:
+            return
 
-        img = np.full((height, width), 127, dtype=np.uint8)  # 전체 회색
-        img[data == 0] = 255  # 갈 수 있는 곳은 흰색
-        img[data == 100] = 0  # 벽은 검은색
+            # 데이터 개수와 크기가 맞는지 확인
+        if len(msg.data) != width * height:
+            return
 
-        # 보기 좋게 상하 반전 및 크기 조정 (선택사항)
-        img = cv2.flip(img, 0)
+        try:
+            data = np.array(msg.data).reshape((height, width))
 
-        # 압축해서 저장 (전송 준비)
-        _, encoded_img = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 70])
-        self.current_map_img = encoded_img.tobytes()
+            # 데이터 변환 로직
+            # -1 (미탐험) -> 127 (회색)
+            # 0 (빈 공간) -> 255 (흰색)
+            # 100 (벽) -> 0 (검은색)
+
+            img = np.full((height, width), 127, dtype=np.uint8)  # 전체 회색
+            img[data == 0] = 255  # 갈 수 있는 곳은 흰색
+            img[data == 100] = 0  # 벽은 검은색
+
+            # 보기 좋게 상하 반전 (ROS 좌표계 -> 이미지 좌표계 보정)
+            img = cv2.flip(img, 0)
+
+            # 압축해서 저장 (전송 준비)
+            _, encoded_img = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 70])
+            self.current_map_img = encoded_img.tobytes()
+
+        except Exception as e:
+            self.get_logger().warn(f"지도 변환 중 에러: {e}")
 
     def start_listening(self):
         while rclpy.ok():
@@ -70,14 +83,20 @@ class MapServer(Node):
                                 # 지도가 아직 없으면 길이 0 전송
                                 conn.sendall(struct.pack(">L", 0))
             except Exception as e:
-                self.get_logger().error(f"통신 에러: {e}")
+                pass  # 연결 끊김 등은 무시하고 대기
 
 
 def main():
     rclpy.init()
     node = MapServer()
-    rclpy.spin(node)
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':
