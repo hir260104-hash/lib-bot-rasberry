@@ -25,19 +25,7 @@ PID1=$!
 echo "✅ 실행됨: MoveBot Twist (PID: $PID1)"
 sleep 1
 
-# (2) 지도 중계 서버 실행
-python3 pi_map_server.py &
-PID2=$!
-echo "✅ 실행됨: Map Server (PID: $PID2)"
-sleep 1
-
-# (3) 위치(Odom) 서버 실행
-python3 pi_odom_server.py &
-PID_ODOM=$!
-echo "✅ 실행됨: Odom Server (PID: $PID_ODOM)"
-sleep 1
-
-# (4) 영상 송신 서버 실행 (파라미터 전달 부분 수정됨!)
+# (2) 영상 송신 서버 실행 (파라미터 전달 부분 수정됨!)
 python3 pi_ros_bridge.py --ros-args -p laptop_ip:=$TARGET_IP &
 PID3=$!
 echo "✅ 실행됨: Video Bridge (PID: $PID3) -> IP: $TARGET_IP"

@@ -12,13 +12,7 @@ ros2 launch turtlebot3_bringup robot.launch.py > /dev/null 2>&1 &
 PID_ROS=$!
 sleep 5
 
-# 2. SLAM (지도 생성) 실행
-echo "🗺️ [2/3] SLAM 실행 중..."
-ros2 launch turtlebot3_cartographer cartographer.launch.py > /dev/null 2>&1 &
-PID_SLAM=$!
-sleep 3
-
-# 3. 카메라 실행 (해상도 320x240 / 화질 15)
+# 2. 카메라 실행 (해상도 320x240 / 화질 15)
 # - image_size: 해상도 설정
 # - image_raw.compressed.jpeg_quality: 압축 화질 (1~100). 낮을수록 용량 작음.
 echo "📷 [3/3] 카메라(저화질 모드) 실행 중..."
