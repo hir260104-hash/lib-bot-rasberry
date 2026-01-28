@@ -53,7 +53,7 @@ class RosToSocket(Node):
             # 연결 성공 후 타임아웃 풀기
             self.sock.settimeout(None)
 
-            self.get_logger().info(f"=== ✅ 윈도우({self.laptop_ip}) 연결 성공! ===")
+            self.get_logger().info(f"=== 윈도우({self.laptop_ip}) 연결 성공! ===")
             return True
         except Exception as e:
             # 연결에 실패해도 프로그램이 Error를 띄우고 꺼지지 않고, 단순히 False 반환 -> listener_callback에서 1초 뒤 다시 시작 가능
@@ -86,7 +86,7 @@ class RosToSocket(Node):
             # >L: 빅 엔디안(4바이트)
             self.sock.sendall(struct.pack(">L", len(data)) + data)
         except (BrokenPipeError, ConnectionResetError):
-            self.get_logger().error("❌ 윈도우 연결 끊김. 재연결 대기...")
+            self.get_logger().error("윈도우 연결 끊김. 재연결 대기...")
             self.sock.close()
             self.sock = None  # 다시 None으로 만들어서 1번 로직이 돌게 함
         except Exception as e:
